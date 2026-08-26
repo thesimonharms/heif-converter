@@ -1,0 +1,450 @@
+@layout('layouts.app')
+
+@section('title')
+  HEIF Converter
+@endsection
+
+@push('styles')
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #09090b;
+    --bg-lift: #111113;
+    --surface: #18181b;
+    --surface-hover: #1f1f23;
+    --line: #27272a;
+    --line-strong: #3f3f46;
+    --text: #fafafa;
+    --muted: #a1a1aa;
+    --faint: #71717a;
+    --accent: #f59e0b;
+    --accent-text: #1c1408;
+    --accent-dim: rgba(245, 158, 11, 0.14);
+    --danger: #fb7185;
+    --ok: #34d399;
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background:
+      radial-gradient(1200px 500px at 50% -10%, rgba(245, 158, 11, 0.12), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+
+  .wrap {
+    width: min(720px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 3.5rem 0 4rem;
+  }
+
+  header {
+    margin-bottom: 1.75rem;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0.35rem 0 0.4rem;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+  }
+
+  .lede {
+    margin: 0;
+    color: var(--muted);
+    max-width: 38rem;
+  }
+
+  .panel {
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.1rem;
+    backdrop-filter: blur(16px);
+  }
+
+  .drop {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 220px;
+    padding: 1.5rem;
+    border: 1.5px dashed var(--line-strong);
+    border-radius: 14px;
+    background: var(--bg-lift);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+
+  .drop:hover,
+  .drop.is-over {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .drop input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .drop strong {
+    display: block;
+    margin-top: 0.55rem;
+    font-size: 1.05rem;
+  }
+
+  .drop span {
+    color: var(--faint);
+    font-size: 0.92rem;
+  }
+
+  .icon {
+    width: 42px;
+    height: 42px;
+    color: var(--accent);
+  }
+
+  .list {
+    display: none;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    list-style: none;
+    max-height: 11rem;
+    overflow: auto;
+  }
+
+  .list.is-on { display: grid; gap: 0.4rem; }
+
+  .list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 10px;
+    background: var(--bg-lift);
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .list b {
+    color: var(--text);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .controls {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .formats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .formats label {
+    display: grid;
+    place-items: center;
+    min-height: 2.7rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg-lift);
+    cursor: pointer;
+    font-weight: 650;
+  }
+
+  .formats input { display: none; }
+
+  .formats input:checked + span {
+    color: var(--accent-text);
+  }
+
+  .formats label:has(input:checked) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  .quality {
+    display: none;
+  }
+
+  .quality.is-on { display: block; }
+
+  .quality-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+  }
+
+  #quality-value {
+    min-width: 2.5rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    min-height: 2.9rem;
+    border: 0;
+    border-radius: 12px;
+    background: var(--accent);
+    color: var(--accent-text);
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  button[type="submit"]:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .status {
+    min-height: 1.4rem;
+    margin: 0.85rem 0 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .status.is-error { color: var(--danger); }
+  .status.is-ok { color: var(--ok); }
+
+  footer {
+    margin-top: 1.1rem;
+    color: var(--faint);
+    font-size: 0.82rem;
+  }
+</style>
+@endpush
+
+@section('content')
+  <main class="wrap">
+    <header>
+      <div class="eyebrow">Local converter</div>
+      <h1>HEIF to JPEG, PNG, and PDF</h1>
+      <p class="lede">Drop iPhone photos on this page. Conversion stays on your machine and the browser opens as soon as the app starts.</p>
+    </header>
+
+    <form id="converter" class="panel">
+      <label class="drop" id="drop">
+        <input id="files" name="files" type="file" accept=".heic,.heif,.hif,image/heic,image/heif,image/heic-sequence" multiple>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <path d="M12 16V4m0 0l-4 4m4-4l4 4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 16.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" stroke-linecap="round"/>
+        </svg>
+        <strong>Drop HEIF files here</strong>
+        <span>or click to choose .heic / .heif photos</span>
+      </label>
+
+      <ul class="list" id="list"></ul>
+
+      <div class="controls">
+        <div>
+          <span class="label">Output</span>
+          <div class="formats">
+            <label><input type="radio" name="format" value="jpeg" checked><span>JPEG</span></label>
+            <label><input type="radio" name="format" value="png"><span>PNG</span></label>
+            <label><input type="radio" name="format" value="pdf"><span>PDF</span></label>
+          </div>
+        </div>
+
+        <div class="quality is-on" id="quality-wrap">
+          <span class="label">JPEG quality</span>
+          <div class="quality-row">
+            <input id="quality" name="quality" type="range" min="60" max="100" value="90">
+            <span id="quality-value">90</span>
+          </div>
+        </div>
+
+        <button type="submit" id="submit" disabled>Convert</button>
+      </div>
+
+      <p class="status" id="status" role="status"></p>
+    </form>
+
+    <footer>Several images become one PDF, or a zip of JPEG/PNG files. Nothing is uploaded anywhere else.</footer>
+  </main>
+@endsection
+
+@push('scripts')
+<script>
+  const form = document.getElementById('converter');
+  const input = document.getElementById('files');
+  const drop = document.getElementById('drop');
+  const list = document.getElementById('list');
+  const submit = document.getElementById('submit');
+  const status = document.getElementById('status');
+  const quality = document.getElementById('quality');
+  const qualityValue = document.getElementById('quality-value');
+  const qualityWrap = document.getElementById('quality-wrap');
+
+  function selectedFiles() {
+    return Array.from(input.files || []);
+  }
+
+  function setStatus(message, kind) {
+    status.textContent = message;
+    status.className = 'status' + (kind ? ' is-' + kind : '');
+  }
+
+  function renderList() {
+    const files = selectedFiles();
+    list.innerHTML = '';
+    list.classList.toggle('is-on', files.length > 0);
+    submit.disabled = files.length === 0;
+
+    for (const file of files) {
+      const item = document.createElement('li');
+      const name = document.createElement('b');
+      const size = document.createElement('span');
+      name.textContent = file.name;
+      size.textContent = prettySize(file.size);
+      item.append(name, size);
+      list.append(item);
+    }
+  }
+
+  function prettySize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function currentFormat() {
+    const checked = form.querySelector('input[name="format"]:checked');
+    return checked ? checked.value : 'jpeg';
+  }
+
+  function syncQuality() {
+    qualityValue.textContent = quality.value;
+    qualityWrap.classList.toggle('is-on', currentFormat() !== 'png');
+  }
+
+  function filenameFromHeader(header, fallback) {
+    if (!header) return fallback;
+    const utf = header.match(/filename\*=UTF-8''([^;]+)/i);
+    if (utf) return decodeURIComponent(utf[1]);
+    const ascii = header.match(/filename="([^"]+)"/i);
+    return ascii ? ascii[1] : fallback;
+  }
+
+  function fallbackName(count) {
+    const format = currentFormat();
+    if (format === 'pdf') return count > 1 ? 'heif-images.pdf' : 'image.pdf';
+    if (count > 1) return 'heif-images.zip';
+    return format === 'png' ? 'image.png' : 'image.jpg';
+  }
+
+  drop.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    drop.classList.add('is-over');
+  });
+
+  drop.addEventListener('dragleave', () => drop.classList.remove('is-over'));
+
+  drop.addEventListener('drop', (event) => {
+    event.preventDefault();
+    drop.classList.remove('is-over');
+    const next = event.dataTransfer && event.dataTransfer.files;
+    if (!next || next.length === 0) return;
+    input.files = next;
+    renderList();
+    setStatus(next.length + ' file' + (next.length === 1 ? '' : 's') + ' ready');
+  });
+
+  input.addEventListener('change', () => {
+    renderList();
+    const count = selectedFiles().length;
+    setStatus(count ? count + ' file' + (count === 1 ? '' : 's') + ' ready' : '');
+  });
+
+  form.addEventListener('change', (event) => {
+    if (event.target && event.target.name === 'format') syncQuality();
+  });
+
+  quality.addEventListener('input', syncQuality);
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const files = selectedFiles();
+    if (files.length === 0) return;
+
+    submit.disabled = true;
+    setStatus('Converting ' + files.length + ' file' + (files.length === 1 ? '' : 's') + '…');
+
+    try {
+      const body = new FormData(form);
+      const response = await fetch('/api/convert', { method: 'POST', body });
+      if (!response.ok) {
+        let message = 'Conversion failed.';
+        try {
+          const payload = await response.json();
+          if (payload && payload.error) message = payload.error;
+        } catch (_error) {}
+        throw new Error(message);
+      }
+
+      const blob = await response.blob();
+      const name = filenameFromHeader(
+        response.headers.get('content-disposition'),
+        fallbackName(files.length),
+      );
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setStatus('Saved ' + name, 'ok');
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Conversion failed.', 'error');
+    } finally {
+      submit.disabled = selectedFiles().length === 0;
+    }
+  });
+
+  syncQuality();
+</script>
+@endpush

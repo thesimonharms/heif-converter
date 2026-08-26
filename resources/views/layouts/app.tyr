@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>@yield('title', 'HEIF Converter')</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2318181b'/%3E%3Cpath d='M8 22l4.5-6 3.5 4.5L20 16l4 6H8z' fill='%23f59e0b'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%23fde68a'/%3E%3C/svg%3E">
+  @stack('styles')
+</head>
+<body>
+  @yield('content')
+  @stack('scripts')
+</body>
+</html>

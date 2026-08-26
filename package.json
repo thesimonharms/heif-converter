@@ -1,0 +1,49 @@
+{
+  "name": "heif-converter",
+  "private": true,
+  "type": "module",
+  "description": "Local Pondoknusa app that converts HEIF/HEIC photos to JPEG, PNG, and PDF in the browser.",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "dev": "node scripts/launch.mjs",
+    "start": "node scripts/launch.mjs --production",
+    "serve": "node scripts/launch.mjs",
+    "dev:server": "pondoknusa dev --no-queue",
+    "dev:worker": "pondoknusa queue:work",
+    "test": "pondoknusa test",
+    "precommit": "pondoknusa view:lint && pondoknusa app:lint",
+    "app:lint": "pondoknusa app:lint",
+    "app:lint:static": "pondoknusa app:lint --static-only"
+  },
+  "dependencies": {
+    "@pondoknusa/cache": "^4.2.0",
+    "@pondoknusa/cli": "^4.2.0",
+    "@pondoknusa/collection": "^4.2.0",
+    "@pondoknusa/config": "^4.2.0",
+    "@pondoknusa/core": "^4.2.0",
+    "@pondoknusa/database": "^4.2.0",
+    "@pondoknusa/echo": "^4.2.0",
+    "@pondoknusa/events": "^4.2.0",
+    "@pondoknusa/http": "^4.2.0",
+    "@pondoknusa/log": "^4.2.0",
+    "@pondoknusa/mail": "^4.2.0",
+    "@pondoknusa/notifications": "^4.2.0",
+    "@pondoknusa/queue": "^4.2.0",
+    "@pondoknusa/ssr": "^4.2.0",
+    "@pondoknusa/storage": "^4.2.0",
+    "@pondoknusa/support": "^4.2.0",
+    "@pondoknusa/validation": "^4.2.0",
+    "@pondoknusa/views": "^4.2.0",
+    "heic-convert": "^2.1.0",
+    "jszip": "^3.10.1",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "@pondoknusa/testing": "^4.2.0",
+    "@types/jszip": "^3.4.0",
+    "@types/node": "^26.3.0",
+    "vitest": "^3.2.4"
+  }
+}
